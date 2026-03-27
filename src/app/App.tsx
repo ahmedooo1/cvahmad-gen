@@ -77,6 +77,8 @@ export default function App() {
   const [mainOrder, setMainOrder] = useState<MainSectionKey[]>(["about", "experience", "projects", "education"]);
   const [draggingSidebarSection, setDraggingSidebarSection] = useState<SidebarSectionKey | null>(null);
   const [draggingMainSection, setDraggingMainSection] = useState<MainSectionKey | null>(null);
+  const [showEducation, setShowEducation] = useState(true);
+  const [showEducationDescription, setShowEducationDescription] = useState(true);
 
   const [cvData, setCVData] = useState<CVData>({
     name: "Ahmad Ahmad",
@@ -587,6 +589,51 @@ export default function App() {
       projects: cvData.projects.filter(proj => proj.id !== id)
     });
   };
+
+  const addTagToProject = (projectId: string) => {
+    setCVData({
+      ...cvData,
+      projects: cvData.projects.map(proj => 
+        proj.id === projectId 
+          ? { ...proj, skills: [...proj.skills, 'Nouveau tag'] }
+          : proj
+      )
+    });
+  };
+
+  const removeTagFromProject = (projectId: string, tagIndex: number) => {
+    setCVData({
+      ...cvData,
+      projects: cvData.projects.map(proj => 
+        proj.id === projectId 
+          ? { ...proj, skills: proj.skills.filter((_, idx) => idx !== tagIndex) }
+          : proj
+      )
+    });
+  };
+
+  const addTagToExperience = (experienceId: string) => {
+    setCVData({
+      ...cvData,
+      experiences: cvData.experiences.map(exp => 
+        exp.id === experienceId 
+          ? { ...exp, skills: [...exp.skills, 'Nouveau tag'] }
+          : exp
+      )
+    });
+  };
+
+  const removeTagFromExperience = (experienceId: string, tagIndex: number) => {
+    setCVData({
+      ...cvData,
+      experiences: cvData.experiences.map(exp => 
+        exp.id === experienceId 
+          ? { ...exp, skills: exp.skills.filter((_, idx) => idx !== tagIndex) }
+          : exp
+      )
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 print:min-h-0 print:bg-white">
       <div className="max-w-7xl mx-auto p-8 print:max-w-none print:p-0">
@@ -1156,26 +1203,50 @@ export default function App() {
                         >
                           {exp.description}
                         </p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 items-center">
                           {exp.skills.map((tech, skillIdx) => (
-                            <span
+                            <div
                               key={skillIdx}
-                              className={`px-3 py-1 text-xs rounded-full ${editMode ? 'cursor-text hover:opacity-80' : ''}`}
+                              className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 ${editMode ? 'group hover:opacity-90' : ''}`}
                               style={{
                                 backgroundColor: index === 0 ? `${design.primaryColor}20` : '#f1f5f9',
                                 color: index === 0 ? design.primaryColor : '#334155'
                               }}
-                              contentEditable={editMode}
-                              suppressContentEditableWarning
-                              onBlur={(e) => {
-                                const newExp = [...cvData.experiences];
-                                newExp[index].skills[skillIdx] = e.currentTarget.textContent || '';
-                                setCVData({...cvData, experiences: newExp});
-                              }}
                             >
-                              {tech}
-                            </span>
+                              <span
+                                className={`${editMode ? 'px-1 rounded hover:bg-white border border-transparent hover:border-blue-300 cursor-text' : ''}`}
+                                contentEditable={editMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => {
+                                  const newExp = [...cvData.experiences];
+                                  newExp[index].skills[skillIdx] = e.currentTarget.textContent || '';
+                                  setCVData({...cvData, experiences: newExp});
+                                }}
+                              >
+                                {tech}
+                              </span>
+                              {editMode && (
+                                <button
+                                  onClick={() => removeTagFromExperience(exp.id, skillIdx)}
+                                  className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity hover:opacity-100"
+                                  style={{color: index === 0 ? design.primaryColor : '#334155'}}
+                                  title="Supprimer ce tag"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
                           ))}
+                          {editMode && (
+                            <button
+                              onClick={() => addTagToExperience(exp.id)}
+                              className="px-2 py-0.5 text-xs rounded-full flex items-center gap-1"
+                              style={{backgroundColor: index === 0 ? `${design.primaryColor}20` : '#f1f5f9', color: index === 0 ? design.primaryColor : '#334155'}}
+                              title="Ajouter un tag"
+                            >
+                              <Plus className="w-3 h-3" /> Tag
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1242,22 +1313,44 @@ export default function App() {
                         >
                           {project.description}
                         </p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 items-center">
                           {project.skills.map((tech, skillIdx) => (
-                            <span
+                            <div
                               key={skillIdx}
-                              className={`px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded ${editMode ? 'cursor-text hover:bg-slate-200' : ''}`}
-                              contentEditable={editMode}
-                              suppressContentEditableWarning
-                              onBlur={(e) => {
-                                const newProj = [...cvData.projects];
-                                newProj[index].skills[skillIdx] = e.currentTarget.textContent || '';
-                                setCVData({...cvData, projects: newProj});
-                              }}
+                              className={`px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded flex items-center gap-1 ${editMode ? 'hover:bg-slate-200 group cursor-text' : ''}`}
                             >
-                              {tech}
-                            </span>
+                              <span
+                                className={`${editMode ? 'px-1 rounded hover:bg-white border border-transparent hover:border-blue-300' : ''}`}
+                                contentEditable={editMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => {
+                                  const newProj = [...cvData.projects];
+                                  newProj[index].skills[skillIdx] = e.currentTarget.textContent || '';
+                                  setCVData({...cvData, projects: newProj});
+                                }}
+                              >
+                                {tech}
+                              </span>
+                              {editMode && (
+                                <button
+                                  onClick={() => removeTagFromProject(project.id, skillIdx)}
+                                  className="ml-1 text-red-600 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Supprimer ce tag"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
                           ))}
+                          {editMode && (
+                            <button
+                              onClick={() => addTagToProject(project.id)}
+                              className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded hover:bg-green-200 flex items-center gap-1"
+                              title="Ajouter un tag"
+                            >
+                              <Plus className="w-3 h-3" /> Tag
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1265,6 +1358,7 @@ export default function App() {
                 </section>
 
                 {/* Education */}
+                {showEducation && (
                 <section
                   className={editMode ? 'cursor-grab active:cursor-grabbing' : ''}
                   style={{ order: getSectionOrder(mainOrder, "education") }}
@@ -1274,9 +1368,29 @@ export default function App() {
                   onDrop={() => handleMainDrop("education")}
                   onDragEnd={() => setDraggingMainSection(null)}
                 >
-                  <div className="flex items-center gap-3 mb-6">
-                    <GraduationCap className="w-6 h-6" style={{color: design.primaryColor}} />
-                    <h2 className="text-2xl text-slate-900">Formation</h2>
+                  <div className="flex items-center gap-3 mb-6 justify-between">
+                    <div className="flex items-center gap-3">
+                      <GraduationCap className="w-6 h-6" style={{color: design.primaryColor}} />
+                      <h2 className="text-2xl text-slate-900">Formation</h2>
+                    </div>
+                    {editMode && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setShowEducationDescription(!showEducationDescription)}
+                          className={`px-3 py-1 text-xs rounded ${showEducationDescription ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}
+                          title="Afficher/Masquer la description"
+                        >
+                          <Eye className="w-4 h-4 inline mr-1" /> Desc
+                        </button>
+                        <button
+                          onClick={() => setShowEducation(false)}
+                          className="px-3 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200"
+                          title="Masquer cette section"
+                        >
+                          <Trash2 className="w-3 h-3 inline mr-1" /> Masquer
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div
                     className={`border rounded-xl p-6 ${editMode ? 'hover:shadow-lg cursor-text' : ''}`}
@@ -1301,6 +1415,7 @@ export default function App() {
                     >
                       {cvData.education.field}
                     </p>
+                    {showEducationDescription && (
                     <p
                       className={`text-slate-600 text-sm ${editMode ? 'px-2 py-1 rounded hover:bg-white cursor-text border-2 border-transparent hover:border-blue-300' : ''}`}
                       contentEditable={editMode}
@@ -1309,6 +1424,7 @@ export default function App() {
                     >
                       {cvData.education.description}
                     </p>
+                    )}
                     <div className="mt-4">
                       <h4 className="text-sm text-slate-900 mb-2">Certifications</h4>
                       <ul className="space-y-1 text-sm text-slate-700">
@@ -1332,6 +1448,7 @@ export default function App() {
                     </div>
                   </div>
                 </section>
+                )}
               </div>
             </main>
           </div>

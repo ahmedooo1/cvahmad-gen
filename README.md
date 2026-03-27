@@ -1,7 +1,5 @@
 
-  # cvahmad (Community)
-
-  This is a code bundle for cvahmad (Community). The original project is available at https://www.figma.com/design/GF2Ql3JgpAAmWjzWWEHnsm/cvahmad--Community-.
+  # cvahmad-gen
 
   ## Running the code
 

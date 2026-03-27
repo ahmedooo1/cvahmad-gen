@@ -1,5 +1,5 @@
 
-  # cvahmad-gen
+  # cvahmad-gen (CV ahmad generator)
 
   ## Running the code
 
